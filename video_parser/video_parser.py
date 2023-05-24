@@ -2,10 +2,38 @@ import cv2
 import pytesseract
 import pandas as pd
 from datetime import datetime
-import argparse
 from tqdm import tqdm
 import re
 import matplotlib.pyplot as plt
+import concurrent.futures
+import time
+
+
+def process_frame(frame):
+  # Prepare a regex pattern to match time strings like '11:22:43 AM'
+  time_pattern = re.compile(r'^\d{1,2}:\d{2}:\d{2} (AM|PM)$')
+
+  # Prepare a regex pattern to match decimal numbers
+  value_pattern = re.compile(r'^\d+(\.\d+)?$')
+
+  # your frame processing code here
+  frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+  # Use Tesseract to do OCR on the thresholded image
+  text = pytesseract.image_to_string(frame)
+
+  # Split the text into lines and extract the data
+  lines = text.split('\n')
+
+  if len(lines) >= 2:
+    time = lines[0].strip()
+    value = lines[1].strip()
+
+    if time_pattern.match(time) and value_pattern.match(value):
+      time = pd.to_datetime(time, format='%I:%M:%S %p').time()
+      value = float(value)
+      return {'Time': time, 'Value': value}
+  return None
 
 
 def extract_frames(video_path):
@@ -23,58 +51,36 @@ def extract_frames(video_path):
   frame_num = 0
   data_list = []
 
-  progress_bar = tqdm(
-      total=int(total_frames),
-      ncols=100,
-      dynamic_ncols=True,
-  )
+  max_workers = 16
+  with concurrent.futures.ThreadPoolExecutor(max_workers) as executor:
+    frames_to_process = []  # store frames to process
 
-  # Prepare a regex pattern to match time strings like '11:22:43 AM'
-  time_pattern = re.compile(r'^\d{1,2}:\d{2}:\d{2} (AM|PM)$')
+    while True:
+      # while frame_num < 600:
+      # Read the next frame
+      ret, frame = video.read()
+      if not ret:
+        break
 
-  # Prepare a regex pattern to match decimal numbers
-  value_pattern = re.compile(r'^\d+(\.\d+)?$')
+      # 1 frame per second
+      if frame_num % (fps // 2) == 0:
+        frames_to_process.append(frame)
 
-  # while True:
-  while frame_num < 500:
-    # Read the next frame
-    ret, frame = video.read()
-    if not ret:
-      break
+      frame_num += 1
 
-    # 1 frame per second
-    if frame_num % (fps // 2) == 0:
-      # Convert the frame to grayscale
-      frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-      # Use Tesseract to do OCR on the thresholded image
-      text = pytesseract.image_to_string(frame)
-
-      # Split the text into lines and extract the data
-      lines = text.split('\n')
-
-      # Make sure we have at least two lines (time and value)
-      if len(lines) >= 2:
-        time = lines[0].strip()
-        value = lines[1].strip()
-
-        # Check if the time and value are in the expected formats
-        if time_pattern.match(time) and value_pattern.match(value):
-          # Convert the time string to a datetime object
-          time = pd.to_datetime(time, format='%I:%M:%S %p').time()
-
-          # Convert the value to float
-          value = float(value)
-
-          # Append the data to the list
-          data_list.append({'Time': time, 'Value': value})
-
-    # Increment the frame number
-    frame_num += 1
-    progress_bar.update(1)
-
-  # Close the progress bar
-  progress_bar.close()
+    # Now, we can use the ThreadPoolExecutor to process the frames
+    future_to_frame = {
+        executor.submit(process_frame, frame): frame
+        for frame in frames_to_process
+    }
+    for future in concurrent.futures.as_completed(future_to_frame):
+      frame = future_to_frame[future]
+      try:
+        data = future.result()
+        if data:
+          data_list.append(data)
+      except Exception as exc:
+        print('%r generated an exception: %s' % (frame, exc))
 
   # Close the video file
   video.release()
@@ -85,7 +91,22 @@ def extract_frames(video_path):
   # drop time duplicates
   df = df.drop_duplicates(subset='Time')
 
-  # Return the dataframe
+  # Convert 'Time' column to datetime format
+  df['Time'] = pd.to_datetime(
+      df['Time'].apply(lambda t: datetime.combine(datetime.today(), t)))
+
+  # Create a date range
+  date_range = pd.date_range(start=df['Time'].min(),
+                             end=df['Time'].max(),
+                             freq='S')
+
+  # Set 'Time' as the index and reindex the DataFrame
+  df.set_index('Time', inplace=True)
+  df = df.reindex(date_range)
+
+  # Convert the index back to time only if necessary
+  df.index = df.index.time
+
   return df
 
 
@@ -102,20 +123,17 @@ def create_and_save_plot(df):
 
 
 def main():
-  parser = argparse.ArgumentParser(description="Convert video to time series")
-  parser.add_argument("video_path", help="Path of the video file to process")
-  args = parser.parse_args()
-
-  print(args.video_path)
-
-  df = extract_frames(args.video_path)
-  print(df)
-
-  # Convert the 'Time' column to datetime format
-  df['Time'] = pd.to_datetime(df['Time'], format='%H:%M:%S').dt.time
+  t_start = time.time()
+  df = extract_frames('/app/video.mp4')
+  print(f'Elapsed time: {time.time() - t_start} seconds')
+  print(df.head())
+  print(f'Number of rows: {len(df)}')
+  print(f'Number of nan rows: {df.Value.isna().sum()}')
+  print(f'first time: {df.index[0]}')
+  print(f'last time: {df.index[-1]}')
 
   # Create and save the plot
-  create_and_save_plot(df)
+  # create_and_save_plot(df)
 
 
 if __name__ == "__main__":
