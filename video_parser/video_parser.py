@@ -17,7 +17,10 @@ def process_frame(frame):
   value_pattern = re.compile(r'^\d+(\.\d+)?$')
 
   # your frame processing code here
-  frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+  # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+  frame = cv2.bitwise_not(frame)
+
+  frame = cv2.resize(frame, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
 
   # Use Tesseract to do OCR on the thresholded image
   text = pytesseract.image_to_string(frame)
@@ -131,6 +134,8 @@ def main():
   print(f'Number of nan rows: {df.Value.isna().sum()}')
   print(f'first time: {df.index[0]}')
   print(f'last time: {df.index[-1]}')
+
+  print(df[df.isna().any(axis=1)])
 
   # Create and save the plot
   # create_and_save_plot(df)
