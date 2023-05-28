@@ -58,7 +58,7 @@ To run the video parser with GPU acceleration using Docker, use the --gpu argume
   docker run 
     -v <path_to_video_file>:/app/video.mp4 \
     -v $PWD/results:/app/results \
-    --gpus 1 -v \
+    --gpus 1 \
     sfarris1994/video-parser --gpu
   ```
 ### Non-Docker Usage
