@@ -13,7 +13,7 @@ The Video Parser is a Python script that converts a video file into a time serie
 ### Docker Installation
 1. Clone the repository and navigate to the project directory (this way you have the test .mp4 file):
   ```bash
-  git clone <repository_url>
+  git clone https://github.com/stuart-farris/video_parser.git
   cd video_parser
   ```
 
@@ -29,7 +29,7 @@ The Video Parser is a Python script that converts a video file into a time serie
 
 2. Clone the repository and navigate to the project directory:
   ```bash
-  git clone <repository_url>
+  git clone https://github.com/stuart-farris/video_parser.git
   cd video_parser
   ```
 
@@ -44,22 +44,22 @@ The Video Parser is a Python script that converts a video file into a time serie
 1. Run the video_parser using the following Docker command:
   ```bash
   docker run \
-    -v <path_to_video_file>:/app/video.mp4 \
+    -v $PWD/Problem_1/Test_Video.mp4:/app/video.mp4 \
     -v $PWD/results:/app/results \
-    sfarris1994/video-parser
+    sfarris1994/video_parser video_parser
   ```
 
-Replace <path_to_video_file> with the path to your video file. The video file should be mounted as a volume inside the Docker container.
+You can also replace ```$PWD/Problem_1/Test_Video.mp4``` with the path to your video file. The video file should be mounted as a volume inside the Docker container.
 
 The time series data will be extracted from the video file, and a file named output.csv will be created in the current directory.
 
 To run the video parser with GPU acceleration using Docker, use the --gpu argument, as follows:
   ```bash
-  docker run 
-    -v <path_to_video_file>:/app/video.mp4 \
+  docker run \
+    -v $PWD/Problem_1/Test_Video.mp4:/app/video.mp4 \
     -v $PWD/results:/app/results \
     --gpus 1 \
-    sfarris1994/video-parser --gpu
+    sfarris1994/video_parser video_parser --gpu
   ```
 ### Non-Docker Usage
 1. Activate the virtual environment created by Poetry:
@@ -68,16 +68,16 @@ To run the video parser with GPU acceleration using Docker, use the --gpu argume
   ```
 2. Run the video_parser script with the following command:
   ```bash
-  python video_parser.py <path_to_video_file>
+  python video_parser.py --video Problem_1/Test_Video.mp4
   ```
 
-Replace <path_to_video_file> with the path to your video file.
+You can also replace ```Problem_1/Test_Video.mp4``` with the path to your video file.
 
 The time series data will be extracted from the video file, and a file named output.csv will be created in the current directory.
 
 To run the video parser with GPU acceleration, use the --gpu argument, as follows:
 ```
-python video_parser.py <path_to_video_file> --gpu
+python video_parser.py Problem_1/Test_Video.mp4 --gpu --video Problem_1/Test_Video.mp4
 ```
 
 ### License

@@ -45,7 +45,7 @@ RUN cd /app && poetry build && pip install dist/*.tar.gz
 RUN chmod -R 777 /app/results
 
 # Set the entrypoint script
-# ENTRYPOINT ["video_parser"]
+# ENTRYPOINT ["python3","video_parser"]
 
 
 

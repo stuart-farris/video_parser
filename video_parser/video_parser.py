@@ -11,7 +11,7 @@ The main steps are as follows:
 This script can optionally utilize GPU acceleration for processing frames 
 by using the '--gpu' command line argument.
 
-Usage: python3 script_name.py --gpu
+Usage: python3 script_name.py --gpu --video /path/to/video.mp4
 """
 import os
 import cv2
@@ -23,6 +23,7 @@ import time
 import easyocr
 import argparse
 from typing import List, Dict, Union, Optional, List
+import sys
 
 
 def process_text_parts(
@@ -239,7 +240,7 @@ def save_csv(df: pd.DataFrame, path: str = '/app/results') -> None:
   df.to_csv(path + '/time_series.csv')
 
 
-def main(use_gpu: Optional[bool] = False) -> None:
+def main() -> None:
   """
     Main function to run the script.
 
@@ -249,8 +250,23 @@ def main(use_gpu: Optional[bool] = False) -> None:
     Returns:
     None
     """
+  # Create the parser
+  parser = argparse.ArgumentParser(description='Process a video file.')
+
+  # Add the arguments
+  parser.add_argument('--gpu',
+                      dest='use_gpu',
+                      action='store_true',
+                      help='Use GPU-accelerated frame processing')
+  parser.add_argument('--video',
+                      default='/app/video.mp4',
+                      help='Path to the video file')
+
+  # Parse the
+  args = parser.parse_args()
+
   t_start = time.time()
-  df = extract_frames('/app/video.mp4', use_gpu)
+  df = extract_frames(args.video, args.use_gpu)
 
   # print some results
   print(f'Total run time: {time.time() - t_start} seconds')
@@ -273,17 +289,5 @@ def main(use_gpu: Optional[bool] = False) -> None:
 
 
 if __name__ == "__main__":
-  # Create the parser
-  parser = argparse.ArgumentParser(description='Process a video file.')
-
-  # Add the arguments
-  parser.add_argument('--gpu',
-                      dest='use_gpu',
-                      action='store_true',
-                      help='Use GPU-accelerated frame processing')
-
-  # Parse the
-  args = parser.parse_args()
-
   # Call the main function with the parsed arguments
-  main(use_gpu=args.use_gpu)
+  main()
