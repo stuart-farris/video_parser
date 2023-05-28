@@ -24,7 +24,7 @@ The Video Parser is a Python script that converts a video file into a time serie
 1. Install Poetry by running the following command:
 
   ```bash
-  pip install poetry
+  curl -sSL https://install.python-poetry.org | python3 -
   ```
 
 2. Clone the repository and navigate to the project directory:
@@ -68,7 +68,7 @@ To run the video parser with GPU acceleration using Docker, use the --gpu argume
   ```
 2. Run the video_parser script with the following command:
   ```bash
-  python video_parser.py --video Problem_1/Test_Video.mp4
+  video_parser --video Problem_1/Test_Video.mp4
   ```
 
 You can also replace ```Problem_1/Test_Video.mp4``` with the path to your video file.
