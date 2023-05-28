@@ -1,26 +1,34 @@
-# Use an official Ubuntu runtime as a parent image
-FROM nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
+# Use PyTorch image as the base image
+FROM pytorch/pytorch
+
+# Set the environment to noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Set the maintainer
-LABEL maintainer="your-email@example.com"
+LABEL maintainer="sfarris@sep.stanford.edu"
 
-# Update the system
+# Configure apt and install packages
 RUN apt-get update -y && \
-    apt-get upgrade -y
+    apt-get install -y \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgl1-mesa-dev \
+    git \
+    # cleanup
+    && apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists
 
 # Install Tesseract and its dependencies
-RUN apt-get install -y tesseract-ocr libtesseract-dev libleptonica-dev x11-apps && \
+RUN apt-get update -y && \
+    apt-get install -y tesseract-ocr libtesseract-dev libleptonica-dev x11-apps && \
     apt-get clean && \
     apt-get autoremove 
 
-# Install Python 3 and pip
-RUN apt-get install -y python3-pip
-
-# Upgrade pip
-RUN pip3 install --upgrade pip
-
 # Install poetry
-RUN pip3 install poetry
+RUN pip install poetry
 
 # Disable creation of virtual environments by poetry
 RUN poetry config virtualenvs.create false
@@ -32,7 +40,9 @@ WORKDIR /app
 COPY . /app
 
 # Build the project and install it
-RUN poetry build && pip install dist/*.tar.gz
+RUN cd /app && poetry build && pip install dist/*.tar.gz
+
+RUN chmod -R 777 /app/results
 
 # Set the entrypoint script
 # ENTRYPOINT ["video_parser"]

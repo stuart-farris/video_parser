@@ -6,12 +6,18 @@ The Video Parser is a Python script that converts a video file into a time serie
 
 - Python 3.7 or higher
 - Poetry (for non-Docker installation)
+- Docker (for Docker isntallation)
 
 ## Installation
 
 ### Docker Installation
+1. Clone the repository and navigate to the project directory (this way you have the test .mp4 file):
+  ```bash
+  git clone <repository_url>
+  cd video_parser
+  ```
 
-1. Install Docker on your system following the official Docker installation instructions: [Docker Installation Guide](https://docs.docker.com/get-docker/)
+2. Install Docker on your system following the official Docker installation instructions: [Docker Installation Guide](https://docs.docker.com/get-docker/)
 
 ### Non-Docker Installation
 
@@ -37,13 +43,24 @@ The Video Parser is a Python script that converts a video file into a time serie
 ### Docker Usage
 1. Run the video_parser using the following Docker command:
   ```bash
-  docker run -v <path_to_video_file>:/app/video.mp4 video-parser
+  docker run \
+    -v <path_to_video_file>:/app/video.mp4 \
+    -v $PWD/results:/app/results \
+    sfarris1994/video-parser
   ```
 
 Replace <path_to_video_file> with the path to your video file. The video file should be mounted as a volume inside the Docker container.
 
 The time series data will be extracted from the video file, and a file named output.csv will be created in the current directory.
 
+To run the video parser with GPU acceleration using Docker, use the --gpu argument, as follows:
+  ```bash
+  docker run 
+    -v <path_to_video_file>:/app/video.mp4 \
+    -v $PWD/results:/app/results \
+    --gpus 1 -v \
+    sfarris1994/video-parser --gpu
+  ```
 ### Non-Docker Usage
 1. Activate the virtual environment created by Poetry:
   ```bash
@@ -57,6 +74,11 @@ The time series data will be extracted from the video file, and a file named out
 Replace <path_to_video_file> with the path to your video file.
 
 The time series data will be extracted from the video file, and a file named output.csv will be created in the current directory.
+
+To run the video parser with GPU acceleration, use the --gpu argument, as follows:
+```
+python video_parser.py <path_to_video_file> --gpu
+```
 
 ### License
 This project is licensed under the MIT License - see the LICENSE file for details.
