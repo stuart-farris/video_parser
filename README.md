@@ -5,7 +5,6 @@ The Video Parser is a Python script that converts a video file into a time serie
 ## Prerequisites
 
 - Python 3.7 or higher
-- Poetry (for non-Docker installation)
 - Docker (for Docker isntallation)
 
 ## Installation
@@ -21,21 +20,16 @@ The Video Parser is a Python script that converts a video file into a time serie
 
 ### Non-Docker Installation
 
-1. Install Poetry by running the following command:
+1. Install the python package:
 
   ```bash
-  curl -sSL https://install.python-poetry.org | python3 -
+  python3 -m pip install video_parser 'git+https://github.com/stuart-farris/video_parser.git@8a4ca186168f7681c33e12b8520e4d2c5d5b1f71'
   ```
 
 2. Clone the repository and navigate to the project directory:
   ```bash
   git clone https://github.com/stuart-farris/video_parser.git
   cd video_parser
-  ```
-
-3. Install the project dependencies with Poetry:
-  ```bash
-  poetry install
   ```
 
 ## Usage
@@ -62,9 +56,9 @@ To run the video parser with GPU acceleration using Docker, use the --gpu argume
     sfarris1994/video_parser video_parser --gpu
   ```
 ### Non-Docker Usage
-1. Activate the virtual environment created by Poetry:
+1. Navigate to the project directory:
   ```bash
-  poetry shell
+  cd video_parser
   ```
 2. Run the video_parser script with the following command:
   ```bash
