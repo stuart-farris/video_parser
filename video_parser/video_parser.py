@@ -101,7 +101,8 @@ def normalize_time(time_text: str) -> str:
 
 
 def extract_frames(video_path: str,
-                   use_gpu: Optional[bool] = False) -> pd.DataFrame:
+                   use_gpu: Optional[bool] = False,
+                   batch_size: Optional[int] = 128) -> pd.DataFrame:
   """
     Extract frames from video and process OCR data to return DataFrame.
 
@@ -126,7 +127,6 @@ def extract_frames(video_path: str,
   frame_num = 0
   data_list = []
 
-  batch_size = 128  # Adjust this based on your GPU's capabilities
   print(f'Loading EasyOCR model')
   reader = easyocr.Reader(['en'], gpu=use_gpu)  # English, using GPU or not
   frames_to_process = []  # store frames to process
@@ -149,7 +149,8 @@ def extract_frames(video_path: str,
   print(f'\nNumber of frames to process: {len(frames_to_process)}')
 
   # extract text from frames
-  text_parts = reader.readtext_batched(frames_to_process, batch_size=batch_size)
+  text_parts = reader.readtext_batched(frames_to_process,
+                                       batch_size=int(batch_size))
 
   # parse text into time and value
   data_list = process_text_parts(text_parts)
@@ -258,6 +259,10 @@ def main() -> None:
                       dest='use_gpu',
                       action='store_true',
                       help='Use GPU-accelerated frame processing')
+  parser.add_argument(
+      '--batch_size',
+      default=128,
+      help='NUmber of frames to process at once. Adjust based on GPU memory.')
   parser.add_argument('--video',
                       default='/app/video.mp4',
                       help='Path to the video file')
@@ -266,7 +271,7 @@ def main() -> None:
   args = parser.parse_args()
 
   t_start = time.time()
-  df = extract_frames(args.video, args.use_gpu)
+  df = extract_frames(args.video, args.use_gpu, args.batch_size)
 
   # print some results
   print(f'Total run time: {time.time() - t_start} seconds')
