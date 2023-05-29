@@ -149,11 +149,13 @@ def extract_frames(video_path: str,
   print(f'\nNumber of frames to process: {len(frames_to_process)}')
 
   # extract text from frames
-  text_parts = reader.readtext_batched(frames_to_process,
-                                       batch_size=int(batch_size))
-
-  # parse text into time and value
-  data_list = process_text_parts(text_parts)
+  data_list = []
+  for i in range(0, len(frames_to_process), batch_size):
+    text_parts = reader.readtext_batched(frames_to_process[i:i + batch_size],
+                                         batch_size=batch_size)
+    # parse text into time and value
+    data_list.append(process_text_parts(text_parts))
+  data_list = [item for sublist in data_list for item in sublist]
 
   # Convert the list to a dataframe
   df = pd.DataFrame(data_list)
@@ -261,7 +263,8 @@ def main() -> None:
                       help='Use GPU-accelerated frame processing')
   parser.add_argument(
       '--batch_size',
-      default=128,
+      type=int,
+      default=16,
       help='NUmber of frames to process at once. Adjust based on GPU memory.')
   parser.add_argument('--video',
                       default='/app/video.mp4',
