@@ -125,7 +125,6 @@ def extract_frames(video_path: str,
 
   # Initialize the frame number and create empty list to hold data
   frame_num = 0
-  data_list = []
 
   print(f'Loading EasyOCR model')
   reader = easyocr.Reader(['en'], gpu=use_gpu)  # English, using GPU or not
@@ -150,12 +149,16 @@ def extract_frames(video_path: str,
 
   # extract text from frames
   data_list = []
-  for i in range(0, len(frames_to_process), batch_size):
-    text_parts = reader.readtext_batched(frames_to_process[i:i + batch_size],
-                                         batch_size=batch_size)
-    # parse text into time and value
-    data_list.append(process_text_parts(text_parts))
-  data_list = [item for sublist in data_list for item in sublist]
+  if use_gpu:
+    for i in range(0, len(frames_to_process), batch_size):
+      text_parts = reader.readtext_batched(frames_to_process[i:i + batch_size],
+                                           batch_size=batch_size)
+      # parse text into time and value
+      data_list.append(process_text_parts(text_parts))
+    data_list = [item for sublist in data_list for item in sublist]
+  else:
+    text_parts = reader.readtext_batched(frames_to_process)
+    data_list = process_text_parts(text_parts)
 
   # Convert the list to a dataframe
   df = pd.DataFrame(data_list)
@@ -225,7 +228,8 @@ def create_and_save_plot(df: pd.DataFrame, path: str = '/app/results') -> None:
   ax.tick_params(axis='both', colors='black')
 
   # Save the plot as a png file
-  plt.savefig(path + '/time_series.png', dpi=300, bbox_inches='tight')
+  if path is not None:
+    plt.savefig(path + '/time_series.png', dpi=300, bbox_inches='tight')
 
 
 def save_csv(df: pd.DataFrame, path: str = '/app/results') -> None:
