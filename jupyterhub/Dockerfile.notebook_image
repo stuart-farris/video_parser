@@ -1,0 +1,25 @@
+FROM sfarris1994/video_parser
+
+RUN  pip3  install \
+    'jupyterhub==1.3.*' \
+    'notebook==6.*'
+
+# create a user, since we don't want to run as root
+RUN apt-get update && \
+    apt-get -qy full-upgrade && \
+    apt-get install -qy curl && \
+    apt-get install -qy curl && \
+    curl -sSL https://get.docker.com/ | sh
+RUN curl -s -L https://nvidia.github.io/nvidia-container-runtime/gpgkey | \
+   apt-key add -
+RUN curl -s -L https://nvidia.github.io/nvidia-container-runtime/ubuntu20.04/nvidia-container-runtime.list | tee /etc/apt/sources.list.d/nvidia-container-runtime.list
+
+RUN curl -s -L https://nvidia.github.io/nvidia-container-runtime/gpgkey | apt-key add -
+RUN apt-get update &&  apt-get install -y nvidia-container-toolkit
+#
+RUN useradd -m jovyan
+ENV HOME=/home/jovyan
+WORKDIR $HOME
+USER jovyan
+
+CMD ["jupyterhub-singleuser"]
