@@ -5,7 +5,7 @@ The Video Parser is a Python script that converts a video file into a time serie
 ## Prerequisites
 
 - Python 3.7 or higher
-- Docker (for Docker isntallation)
+- Docker (for Docker usage)
 
 ## Installation
 
