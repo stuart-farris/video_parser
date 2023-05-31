@@ -65,4 +65,12 @@ admin = os.environ.get("JUPYTERHUB_ADMIN")
 if admin:
     c.Authenticator.admin_users = [admin]
     
-c.DockerSpawner.extra_host_config = {'runtime': 'nvidia'}
+# c.DockerSpawner.extra_host_config = {'runtime': 'nvidia'}
+
+c.DockerSpawner.extra_host_config = {
+    'runtime': 'nvidia',
+    'init': True
+}
+
+# c.Spawner.default_url = '/lab'
+
