@@ -62,7 +62,9 @@ cd /app/video_parser/jupyterhub
 sudo docker-compose build
 
 # build the notebook image
-sudo docker build -t notebook_image -f Dockerfile.notebook_image .
+# sudo docker build -t notebook_image -f Dockerfile.notebook_image .
+# pull prebuilt image since build takes forever
+sudo docker pull sfarris1994/video_parser_notebook
 
 # start the jupyterhub
 sudo docker-compose up -d
