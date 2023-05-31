@@ -21,12 +21,6 @@ RUN apt-get update -y && \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists
 
-# Install Tesseract and its dependencies
-RUN apt-get update -y && \
-    apt-get install -y tesseract-ocr libtesseract-dev libleptonica-dev x11-apps && \
-    apt-get clean && \
-    apt-get autoremove 
-
 # Install poetry
 RUN pip install poetry
 
