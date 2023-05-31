@@ -1,24 +1,5 @@
 #!/bin/bash
-echo "Checking for CUDA and installing."
-# Check for CUDA and try to install.
-# if ! dpkg-query -W cuda-9-0; then
-#   # The 16.04 installer works with 16.10.
-#   curl -O http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.0.176-1_amd64.deb
-#   dpkg -i ./cuda-repo-ubuntu1604_9.0.176-1_amd64.deb
-#   apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
-#   apt-get update
-#   apt-get install cuda-9-0 -y
-# fi
-# if ! dpkg-query -W cuda-10-2; then
-#   wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin
-#   sudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600
-#   wget http://developer.download.nvidia.com/compute/cuda/10.2/Prod/local_installers/cuda-repo-ubuntu1804-10-2-local-10.2.89-440.33.01_1.0-1_amd64.deb
-#   sudo dpkg -i cuda-repo-ubuntu1804-10-2-local-10.2.89-440.33.01_1.0-1_amd64.deb
-#   sudo apt-key add /var/cuda-repo-10-2-local-10.2.89-440.33.01/7fa2af80.pub
-#   sudo apt update
-#   sudo apt -y install cuda-drivers
-#   sudo systemctl set-default  multi-user.target
-# fi
+
 # install drivers
 while sudo fuser /var/lib/dpkg/lock \
                   /var/lib/apt/lists/lock \
@@ -66,33 +47,22 @@ apt-get update
 apt-get install -y nvidia-docker2
 pkill -SIGHUP dockerd
 
-# # add ssh key
-# mkdir ~/.ssh
-
-# echo "<ADD_YOUR_SSH_KEY_HERE>"  >> ~/.ssh/id_rsa_gitlab
-# ssh-keyscan gitlab.com >>  ~/.ssh/known_hosts
-# chmod 0400 ~/.ssh/id_rsa_gitlab
-# eval "$(ssh-agent -s)"
-# ssh-add ~/.ssh/id_rsa_gitlab
-
-
 ### START THE JUPYTERHUB
 # install docker-compose
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 
 # Clone project repository
-cd ~
-git clone https://github.com/stuart-farris/video_parser
+git clone https://github.com/stuart-farris/video_parser /app/video_parser
 
 # Enter the jupyterhub directory
-cd video_parser/jupyterhub
+cd /app/video_parser/jupyterhub
 
 # build the jupyterhub image
-sudo  docker-compose build
+sudo docker-compose build
 
 # build the notebook image
-sudo docker build -t notebook_image Dockerfile.notebook_image
+sudo docker build -t notebook_image -f Dockerfile.notebook_image .
 
 # start the jupyterhub
-sudo docker-compose up - d
+sudo docker-compose up -d

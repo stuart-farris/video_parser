@@ -21,7 +21,7 @@ This directory contains Terraform scripts for provisioning a GPU-accelerated com
     terraform apply -var 'project=YOUR_PROJECT_ID'
     ```
    Confirm the deployment by typing `yes` when prompted.
-5. Once the deployment is successful, Terraform will output the public IP address of the created instance. Use this IP address to access your JupyterHub.
+5. Once the deployment is successful, Terraform will output the public IP address of the created instance, `[your-server-ip]`. Use this IP address to access your JupyterHub.at `http://[your-server-ip]:8000`.  Note that the created instance will appear quickly but it might take ~10 minutes for the JupyterHub to start (several Docker images need to be created).
 6. To clean up the resources when you're done, run:
     ```
     terraform destroy -var 'project=YOUR_PROJECT_ID'
